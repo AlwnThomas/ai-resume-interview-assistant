@@ -4,6 +4,7 @@ from models import User
 from schemas import UserCreate, UserResponse
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
+from auth import hash_password
 
 app = FastAPI(
     title="AI Resume & Interview Assistant",
@@ -25,7 +26,7 @@ def create_user(user: UserCreate):
 
     new_user = User(
         email=user.email,
-        hashed_password=user.password
+        hashed_password=hash_password(user.password)
     )
 
     try:
