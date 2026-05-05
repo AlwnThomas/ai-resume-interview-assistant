@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile
-from models import User
-from schemas import UserCreate, UserResponse, UserLogin
-from sqlalchemy.exc import IntegrityError
 from PyPDF2 import PdfReader
+from schemas import UserCreate, UserResponse, UserLogin, ResumeResponse
+from sqlalchemy.exc import IntegrityError
+from models import User, Resume
 from database import SessionLocal
 from auth import hash_password, verify_password
 import io
@@ -95,7 +95,29 @@ async def upload_resume(file: UploadFile = File(...)):
     for page in reader.pages:
         text += page.extract_text() or ""
 
+    db = SessionLocal()
+
+    new_resume = Resume(
+        filename=file.filename,
+        extracted_text=text
+    )
+
+    db.add(new_resume)
+    db.commit()
+    db.close()
+
     return{
-        "filename": file.filename,
-        "extracted_text": text[:1000]
+        "message": "Resume uploaded successfully",
+        "filename": file.filename
     }
+
+@app.get("/resumes", resume_model=list[ResumeResponse])
+def get_resumes():
+
+    db = SessionLocal()
+
+    resumes = db.query(Resume).all()
+
+    db.close()
+
+    return resumes

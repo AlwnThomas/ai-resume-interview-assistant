@@ -14,3 +14,10 @@ class UserResponse(BaseModel):
 class UserLogin(BaseModel):
     email: str
     password: str
+
+class ResumeResponse(BaseModel):
+    id: int
+    filename: str
+
+    class Config:
+        from_attributes: True
