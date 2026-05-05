@@ -1,9 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from models import User
 from schemas import UserCreate, UserResponse, UserLogin
 from sqlalchemy.exc import IntegrityError
+from PyPDF2 import PdfReader
 from database import SessionLocal
 from auth import hash_password, verify_password
+import io
 
 app = FastAPI(
     title="AI Resume & Interview Assistant",
@@ -78,3 +80,22 @@ def login(user: UserLogin):
         )
     
     return {"message": "Login Successful"}
+
+@app.post("/resume/upload")
+async def upload_resume(file: UploadFile = File(...)):
+
+    contents = await file.read()
+
+    pdf_file = io.BytesIO(contents)
+
+    reader = PdfReader(pdf_file)
+
+    text = ""
+
+    for page in reader.pages:
+        text += page.extract_text() or ""
+
+    return{
+        "filename": file.filename,
+        "extracted_text": text[:1000]
+    }
