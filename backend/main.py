@@ -1,10 +1,9 @@
-from fastapi import FastAPI
-from database import SessionLocal
+from fastapi import FastAPI, HTTPException
 from models import User
-from schemas import UserCreate, UserResponse
-from fastapi import HTTPException
+from schemas import UserCreate, UserResponse, UserLogin
 from sqlalchemy.exc import IntegrityError
-from auth import hash_password
+from database import SessionLocal
+from auth import hash_password, verify_password
 
 app = FastAPI(
     title="AI Resume & Interview Assistant",
@@ -56,3 +55,26 @@ def get_users():
     db.close()
 
     return users
+
+@app.post("/login")
+def login(user: UserLogin):
+
+    db = SessionLocal()
+
+    existing_user = db.query(User).filter(User.email == user.email).first()
+
+    db.close()
+
+    if existing_user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+    
+    if not verify_password(user.password, existing_user.hashed_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+    
+    return {"message": "Login Successful"}
