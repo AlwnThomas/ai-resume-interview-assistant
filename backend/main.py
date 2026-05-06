@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from models import User, Resume
 from database import SessionLocal
 from auth import hash_password, verify_password
+from ai import analyze_resume_text
 import io
 
 app = FastAPI(
@@ -111,7 +112,7 @@ async def upload_resume(file: UploadFile = File(...)):
         "filename": file.filename
     }
 
-@app.get("/resumes", resume_model=list[ResumeResponse])
+@app.get("/resumes", response_model=list[ResumeResponse])
 def get_resumes():
 
     db = SessionLocal()
@@ -121,3 +122,47 @@ def get_resumes():
     db.close()
 
     return resumes
+
+@app.get("/resumes/{resume_id}")
+def get_resume(resume_id: int):
+
+    db = SessionLocal()
+
+    resume = db.query(Resume).filter(Resume.id == resume_id).first()
+
+    db.close()
+
+    if resume is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Resume not found"
+        )
+    
+    return{
+        "id": resume.id,
+        "filename": resume.filename,
+        "extracted_text": resume.extracted_text
+    }
+
+@app.post("/resumes/{resume_id}/analyze")
+def analyze_resume(resume_id: int):
+
+    db = SessionLocal()
+
+    resume = db.query(Resume).filter(Resume.id == resume_id).first()
+
+    db.close()
+
+    if resume is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Resume not found"
+        )
+
+    analysis = analyze_resume_text(resume.extracted_text)
+
+    return {
+        "resume_id": resume.id,
+        "filename": resume.filename,
+        "analysis": analysis
+    }
