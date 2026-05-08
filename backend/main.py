@@ -214,3 +214,44 @@ def get_analyses():
     db.close()
 
     return analyses
+
+@app.get("/analyses/{analysis_id}", response_model=AnalysisResponse)
+def get_analysis(analysis_id: int):
+
+    db = SessionLocal()
+
+    analysis = db.query(Analysis).filter(Analysis.id == analysis_id).first()
+
+    db.close()
+
+    if analysis is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Analysis not found"
+        )
+    return analysis
+
+@app.delete("analyses/{analysis_id}")
+def delete_analysis(analysis_id: int):
+
+    db = SessionLocal()
+
+    analysis = db.query(Analysis).filter(
+        Analysis.id == analysis_id
+    ).first()
+
+    if analysis is None:
+        db.close()
+
+        raise HTTPException(
+            status_code=404
+            detail="Analysis not found"
+        )
+    
+    db.delete(analysis)
+
+    db.commit()
+
+    db.close()
+
+    return {"message": "Analysis deleted successfully"}
