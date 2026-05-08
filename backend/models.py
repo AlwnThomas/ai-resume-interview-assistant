@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, ForeignKey
 from database import Base
 
 class User(Base):
@@ -14,3 +14,13 @@ class Resume(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String)
     extracted_text = Column(Text)
+
+class Analysis(Base):
+    __tablename__ = "analysis"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    resume_id = Column(Integer, ForeignKey("resumes.id"))
+
+    job_description = Column(Text)
+    analysis_result = Column(Text)
