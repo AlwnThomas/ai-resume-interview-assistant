@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile
+from openai import RateLimitError, APIError
 from PyPDF2 import PdfReader
-from schemas import UserCreate, UserResponse, UserLogin, ResumeResponse
+from schemas import UserCreate, UserResponse, UserLogin, ResumeResponse, ResumeAnalysisRequest
 from sqlalchemy.exc import IntegrityError
 from models import User, Resume
 from database import SessionLocal
@@ -145,7 +146,7 @@ def get_resume(resume_id: int):
     }
 
 @app.post("/resumes/{resume_id}/analyze")
-def analyze_resume(resume_id: int):
+def analyze_resume(resume_id: int, request: ResumeAnalysisRequest):
 
     db = SessionLocal()
 
@@ -159,7 +160,23 @@ def analyze_resume(resume_id: int):
             detail="Resume not found"
         )
 
-    analysis = analyze_resume_text(resume.extracted_text)
+    try:
+        analysis = analyze_resume_text(
+            resume.extracted_text,
+            request.job_description
+        )
+    
+    except RateLimitError:
+        raise HTTPException(
+            status_code=402,
+            detail="OpenAI quota exceeded. Please check API billing or credits."
+        )
+    
+    except APIError:
+        raise HTTPException(
+            wstatus_code=402,
+            detail="OpenAI service error. Please try again later."
+        )
 
     return {
         "resume_id": resume.id,
