@@ -24,3 +24,12 @@ class ResumeResponse(BaseModel):
 
 class ResumeAnalysisRequest(BaseModel):
     job_description: str
+
+class AnalysisResponse(BaseModel):
+    id: int
+    resume_id: int
+    job_description: str
+    analysis_result: str
+
+    class Config:
+        from_attributes = True

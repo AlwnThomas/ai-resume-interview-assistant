@@ -1,9 +1,16 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from openai import RateLimitError, APIError
 from PyPDF2 import PdfReader
-from schemas import UserCreate, UserResponse, UserLogin, ResumeResponse, ResumeAnalysisRequest
+from schemas import (
+    UserCreate, 
+    UserResponse, 
+    UserLogin, 
+    ResumeResponse, 
+    ResumeAnalysisRequest, 
+    AnalysisResponse
+)
 from sqlalchemy.exc import IntegrityError
-from models import User, Resume
+from models import User, Resume, Analysis
 from database import SessionLocal
 from auth import hash_password, verify_password
 from ai import analyze_resume_text
@@ -165,6 +172,18 @@ def analyze_resume(resume_id: int, request: ResumeAnalysisRequest):
             resume.extracted_text,
             request.job_description
         )
+
+        db = SessionLocal()
+
+        new_analysis = Analysis(
+            resume_id=resume.id,
+            job_description=request.job_description,
+            analysis_result=analysis
+        )
+
+        db.add(new_analysis)
+        db.commit()
+        db.close()
     
     except RateLimitError:
         raise HTTPException(
@@ -179,7 +198,19 @@ def analyze_resume(resume_id: int, request: ResumeAnalysisRequest):
         )
 
     return {
+        "analysis_id": new_analysis.id,
         "resume_id": resume.id,
         "filename": resume.filename,
         "analysis": analysis
     }
+
+@app.get("/analyses", response_model=list[AnalysisResponse])
+def get_analyses():
+
+    db = SessionLocal()
+
+    analyses = db.query(Analysis).all()
+
+    db.close()
+
+    return analyses
