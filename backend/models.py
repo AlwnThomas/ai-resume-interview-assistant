@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from database import Base
 
 class User(Base):
@@ -15,8 +16,10 @@ class Resume(Base):
     filename = Column(String)
     extracted_text = Column(Text)
 
+    analyses = relationship("Analysis", back_populates="resume")
+
 class Analysis(Base):
-    __tablename__ = "analysis"
+    __tablename__ = "analyses"
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -24,3 +27,5 @@ class Analysis(Base):
 
     job_description = Column(Text)
     analysis_result = Column(Text)
+
+    resume = relationship("Resume", back_populates="anlyses")

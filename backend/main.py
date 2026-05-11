@@ -244,8 +244,8 @@ def delete_analysis(analysis_id: int):
         db.close()
 
         raise HTTPException(
-            status_code=404
-            detail="Analysis not found"
+            status_code = 404,
+            detail = "Analysis not found"
         )
     
     db.delete(analysis)
@@ -255,3 +255,28 @@ def delete_analysis(analysis_id: int):
     db.close()
 
     return {"message": "Analysis deleted successfully"}
+
+@app.delete("/resumes/{resume_id}")
+def delete_resume(resume_id:int):
+
+    db = SessionLocal()
+
+    resume = db.query(Resume).filter(
+        Resume.id == resume_id
+    ).first()
+
+    if resume is None:
+        db.close()
+
+        raise HTTPException(
+            status_code = 404,
+            detail = "Resume not found"
+        )
+    
+    db.delete(resume)
+
+    db.commit()
+
+    db.close()
+
+    return {"message": "Resume deleted successfully"}
