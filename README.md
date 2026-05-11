@@ -23,7 +23,7 @@ This project allows users to:
 
 # Features ⚙️
 
-## Authentication
+## Authentication 🔐
 
 * User registration
 * User login
@@ -32,7 +32,7 @@ This project allows users to:
 
 ---
 
-## Resume Management
+## Resume Management 🗂️
 
 * Upload PDF resumes
 * Extract text from uploaded resumes
@@ -43,7 +43,7 @@ This project allows users to:
 
 ---
 
-## AI Resume Analysis
+## AI Resume Analysis 🔍
 
 * Compare resume against job description
 * Generate:
