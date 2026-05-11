@@ -16,7 +16,11 @@ class Resume(Base):
     filename = Column(String)
     extracted_text = Column(Text)
 
-    analyses = relationship("Analysis", back_populates="resume")
+    analyses = relationship(
+        "Analysis", 
+        back_populates="resume",
+        cascade = "all, delete-orphan"
+        )
 
 class Analysis(Base):
     __tablename__ = "analyses"

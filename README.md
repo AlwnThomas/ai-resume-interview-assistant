@@ -1,4 +1,4 @@
-# AI Resume Analyser Backend
+# AI Resume Analyser Backend 🤖
 
 A production-style backend project for an AI-powered resume analysis platform built with:
 
@@ -21,7 +21,7 @@ This project allows users to:
 
 ---
 
-# Features
+# Features ⚙️
 
 ## Authentication
 
