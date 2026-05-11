@@ -23,7 +23,7 @@ This project allows users to:
 
 # Features ⚙️
 
-## Authentication 🔐
+## Authentication 
 
 * User registration
 * User login
@@ -32,7 +32,7 @@ This project allows users to:
 
 ---
 
-## Resume Management 🗂️
+## Resume Management 
 
 * Upload PDF resumes
 * Extract text from uploaded resumes
@@ -43,7 +43,7 @@ This project allows users to:
 
 ---
 
-## AI Resume Analysis 🔍
+## AI Resume Analysis 
 
 * Compare resume against job description
 * Generate:
@@ -57,7 +57,7 @@ This project allows users to:
 
 ---
 
-## Database Features
+## Database Features 
 
 * PostgreSQL integration
 * SQLAlchemy ORM models
@@ -67,7 +67,7 @@ This project allows users to:
 
 ---
 
-# Tech Stack
+# Tech Stack 
 
 | Technology    | Purpose               |
 | ------------- | --------------------- |
@@ -77,15 +77,11 @@ This project allows users to:
 | SQLAlchemy    | ORM                   |
 | Pydantic      | Data validation       |
 | OpenAI API    | AI analysis           |
-| Uvicorn       | ASGI server           |
-| Passlib       | Password hashing      |
-| bcrypt        | Password encryption   |
-| python-dotenv | Environment variables |
 | PyPDF2        | PDF text extraction   |
 
 ---
 
-# Project Structure
+# Project Structure 🏗️
 
 ```text
 backend/
@@ -96,7 +92,6 @@ backend/
 ├── schemas.py
 ├── auth.py
 ├── ai.py
-├── create_tables.py
 ├── requirements.txt
 ├── .env
 ├── .gitignore
@@ -107,7 +102,7 @@ backend/
 
 ---
 
-# API Architecture
+# API Architecture 📡
 
 ```text
 Frontend/User
@@ -121,74 +116,7 @@ SQLAlchemy ORM
 PostgreSQL Database
 ```
 
-AI analysis flow:
-
-```text
-Resume Upload
-→ PDF Extraction
-→ Store in PostgreSQL
-→ Send Resume + Job Description to OpenAI
-→ Receive AI Analysis
-→ Store Analysis in PostgreSQL
-→ Return Response
-```
-
----
-
-# Database Models
-
-## User
-
-Stores:
-
-* email
-* hashed password
-
----
-
-## Resume
-
-Stores:
-
-* filename
-* extracted text
-
-Relationship:
-
-```text
-One Resume → Many Analyses
-```
-
----
-
-## Analysis
-
-Stores:
-
-* resume_id
-* job_description
-* analysis_result
-
-Relationship:
-
-```text
-Many Analyses → One Resume
-```
-
----
-
-# Environment Variables
-
-Create a `.env` file inside `backend/`:
-
-```env
-DATABASE_URL=postgresql://username:password@localhost:5432/postgres
-OPENAI_API_KEY=your_openai_api_key
-```
-
----
-
-# Installation
+# Installation ⬇️
 
 ## 1. Clone Repository
 
@@ -270,114 +198,6 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# API Endpoints
-
-# Authentication
-
-## Register User
-
-```http
-POST /users
-```
-
-Request:
-
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
----
-
-## Login User
-
-```http
-POST /login
-```
-
----
-
-# Resume Endpoints
-
-## Upload Resume
-
-```http
-POST /upload-resume
-```
-
-Uploads PDF and extracts text.
-
----
-
-## Get All Resumes
-
-```http
-GET /resumes
-```
-
----
-
-## Get Single Resume
-
-```http
-GET /resumes/{resume_id}
-```
-
----
-
-## Delete Resume
-
-```http
-DELETE /resumes/{resume_id}
-```
-
-Cascade deletes related analyses.
-
----
-
-# AI Analysis Endpoints
-
-## Analyze Resume
-
-```http
-POST /resumes/{resume_id}/analyze
-```
-
-Request:
-
-```json
-{
-  "job_description": "We are looking for a Python backend engineer with FastAPI and PostgreSQL experience."
-}
-```
-
----
-
-## Get All Analyses
-
-```http
-GET /analyses
-```
-
----
-
-## Get Single Analysis
-
-```http
-GET /analyses/{analysis_id}
-```
-
----
-
-## Delete Analysis
-
-```http
-DELETE /analyses/{analysis_id}
-```
-
----
 
 # SQLAlchemy Concepts Used
 
@@ -468,19 +288,6 @@ This keeps:
 * AI logic
 
 properly separated.
-
----
-
-# Error Handling
-
-Implemented handling for:
-
-* invalid login
-* duplicate users
-* missing resumes
-* missing analyses
-* OpenAI quota errors
-* OpenAI API failures
 
 ---
 
