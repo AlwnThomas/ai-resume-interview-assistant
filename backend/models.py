@@ -9,12 +9,20 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
 
+    resumes = relationship(
+        "Resume",
+        back_populates="owner",
+        cascade="all, delete-orphan"
+    )
+
 class Resume(Base):
     __tablename__ = "resumes"
 
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String)
     extracted_text = Column(Text)
+
+    user_id = Column(Integer, ForeignKey("users.id"))
 
     analyses = relationship(
         "Analysis", 
@@ -32,4 +40,4 @@ class Analysis(Base):
     job_description = Column(Text)
     analysis_result = Column(Text)
 
-    resume = relationship("Resume", back_populates="anlyses")
+    resume = relationship("Resume", back_populates="analyses")
