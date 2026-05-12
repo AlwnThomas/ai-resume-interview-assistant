@@ -24,6 +24,11 @@ class Resume(Base):
 
     user_id = Column(Integer, ForeignKey("users.id"))
 
+    owner = relationship(
+        "User",
+        back_populates="resumes"
+    )
+
     analyses = relationship(
         "Analysis", 
         back_populates="resume",
