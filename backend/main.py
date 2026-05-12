@@ -1,6 +1,10 @@
-from fastapi import FastAPI, HTTPException, File, UploadFile
-from openai import RateLimitError, APIError
-from PyPDF2 import PdfReader
+from fastapi import (
+    FastAPI, 
+    HTTPException, 
+    File, 
+    UploadFile, 
+    Depends
+)
 from schemas import (
     UserCreate, 
     UserResponse, 
@@ -9,17 +13,64 @@ from schemas import (
     ResumeAnalysisRequest, 
     AnalysisResponse
 )
+from auth import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    SECRET_KEY,
+    ALGORITHM
+)
+from fastapi.security import OAuth2PasswordBearer
+from database import SessionLocal, Base, engine
+from openai import RateLimitError, APIError
 from sqlalchemy.exc import IntegrityError
 from models import User, Resume, Analysis
-from database import SessionLocal
-from auth import hash_password, verify_password
 from ai import analyze_resume_text
+from jose import JWTError, jwt
+from PyPDF2 import PdfReader
 import io
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="AI Resume & Interview Assistant",
     version="0.1.0"
 )
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials"
+    )
+
+    try:
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        email = payload.get("sub")
+
+        if email is None:
+            raise credentials_exception
+
+    except JWTError:
+        raise credentials_exception
+
+    db = SessionLocal()
+
+    user = db.query(User).filter(User.email == email).first()
+
+    db.close()
+
+    if user is None:
+        raise credentials_exception
+
+    return user
 
 @app.get("/")
 def root():
@@ -88,10 +139,20 @@ def login(user: UserLogin):
             detail="Invalid email or password"
         )
     
-    return {"message": "Login Successful"}
+    access_token = create_access_token(
+        data={"sub": existing_user.email}
+    )
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+        }
 
 @app.post("/resume/upload")
-async def upload_resume(file: UploadFile = File(...)):
+async def upload_resume(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
+    ):
 
     contents = await file.read()
 
@@ -108,7 +169,8 @@ async def upload_resume(file: UploadFile = File(...)):
 
     new_resume = Resume(
         filename=file.filename,
-        extracted_text=text
+        extracted_text=text,
+        user_id=current_user.id
     )
 
     db.add(new_resume)
